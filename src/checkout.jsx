@@ -2,6 +2,7 @@ import React from 'react';
 import { createCheckoutService } from '@bigcommerce/checkout-sdk';
 import Snackbar from 'material-ui/Snackbar';
 import Cart from './cart';
+import Customer from './customer';
 
 export default class CheckoutComponent extends React.PureComponent {
     constructor(props) {
@@ -54,6 +55,12 @@ export default class CheckoutComponent extends React.PureComponent {
                 }
 
                 <Cart cart={ checkout.getCart() }/>
+
+                <Customer
+                    customer={ checkout.getCustomer() }
+                    error={ errors.getSignInError() }
+                    onSignIn={ (credentials) => this.service.signInCustomer(credentials) }
+                    onSignOut={ () => this.service.signOutCustomer() }/>
             </section>
         );
     }
