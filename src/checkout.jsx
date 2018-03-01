@@ -1,5 +1,7 @@
 import React from 'react';
 import { createCheckoutService } from '@bigcommerce/checkout-sdk';
+import Snackbar from 'material-ui/Snackbar';
+import Cart from './cart';
 
 export default class CheckoutComponent extends React.PureComponent {
     constructor(props) {
@@ -13,17 +15,45 @@ export default class CheckoutComponent extends React.PureComponent {
                 storeName: 'robin.ong+1521680812 testsworthy',
             },
         });
+
+        this.state = { isFirstLoad: true };
     }
 
     componentDidMount() {
         this.service.loadCheckout()
-            .then(({ checkout }) => console.log(checkout.getCart()));
+            .then(() => this.setState({ isFirstLoad: false }));
+
+        this.unsubscribe = this.service.subscribe((state) => {
+            this.setState(state);
+        });
+    }
+
+    componentWillUnmount() {
+        this.unsubscribe();
     }
 
     render() {
+        const { checkout, errors, statuses } = this.service.getState();
+
+        if (this.state.isFirstLoad) {
+            return (
+                <Snackbar
+                    anchorOrigin={ { vertical: 'top', horizontal: 'center' } }
+                    open={ true }
+                    message="Loading..."/>
+            );
+        }
+
         return (
             <section>
-                Checkout
+                { statuses.isPending() &&
+                    <Snackbar
+                        anchorOrigin={ { vertical: 'top', horizontal: 'center' } }
+                        open={ true }
+                        message="Loading..."/>
+                }
+
+                <Cart cart={ checkout.getCart() }/>
             </section>
         );
     }
