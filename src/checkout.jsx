@@ -3,6 +3,7 @@ import { createCheckoutService } from '@bigcommerce/checkout-sdk';
 import Snackbar from 'material-ui/Snackbar';
 import Cart from './cart';
 import Customer from './customer';
+import Shipping from './shipping';
 
 export default class CheckoutComponent extends React.PureComponent {
     constructor(props) {
@@ -21,8 +22,11 @@ export default class CheckoutComponent extends React.PureComponent {
     }
 
     componentDidMount() {
-        this.service.loadCheckout()
-            .then(() => this.setState({ isFirstLoad: false }));
+        Promise.all([
+            this.service.loadCheckout(),
+            this.service.loadShippingCountries(),
+            this.service.loadShippingOptions(),
+        ]).then(() => this.setState({ isFirstLoad: false }));
 
         this.unsubscribe = this.service.subscribe((state) => {
             this.setState(state);
@@ -61,6 +65,14 @@ export default class CheckoutComponent extends React.PureComponent {
                     error={ errors.getSignInError() }
                     onSignIn={ (credentials) => this.service.signInCustomer(credentials) }
                     onSignOut={ () => this.service.signOutCustomer() }/>
+
+                <Shipping
+                    address={ checkout.getShippingAddress() }
+                    countries={ checkout.getShippingCountries() }
+                    options={ checkout.getShippingOptions() }
+                    selectedOptionId={ checkout.getSelectedShippingOption() ? checkout.getSelectedShippingOption().id : '' }
+                    onSelect={ (addressId, optionId) => this.service.selectShippingOption(addressId, optionId) }
+                    onUpdate={ (address) => this.service.updateShippingAddress(address) } />
             </section>
         );
     }
