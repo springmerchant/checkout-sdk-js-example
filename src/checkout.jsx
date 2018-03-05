@@ -1,6 +1,7 @@
 import React from 'react';
 import { createCheckoutService } from '@bigcommerce/checkout-sdk';
 import Snackbar from 'material-ui/Snackbar';
+import Billing from './billing';
 import Cart from './cart';
 import Customer from './customer';
 import Shipping from './shipping';
@@ -26,6 +27,7 @@ export default class CheckoutComponent extends React.PureComponent {
             this.service.loadCheckout(),
             this.service.loadShippingCountries(),
             this.service.loadShippingOptions(),
+            this.service.loadBillingCountries(),
         ]).then(() => this.setState({ isFirstLoad: false }));
 
         this.unsubscribe = this.service.subscribe((state) => {
@@ -73,6 +75,11 @@ export default class CheckoutComponent extends React.PureComponent {
                     selectedOptionId={ checkout.getSelectedShippingOption() ? checkout.getSelectedShippingOption().id : '' }
                     onSelect={ (addressId, optionId) => this.service.selectShippingOption(addressId, optionId) }
                     onUpdate={ (address) => this.service.updateShippingAddress(address) } />
+
+                <Billing
+                    address={ checkout.getBillingAddress() }
+                    countries={ checkout.getBillingCountries() }
+                    onUpdate={ (address) => this.service.updateBillingAddress(address) } />
             </section>
         );
     }
