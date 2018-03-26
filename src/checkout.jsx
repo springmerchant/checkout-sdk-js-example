@@ -4,6 +4,7 @@ import Snackbar from 'material-ui/Snackbar';
 import Billing from './billing';
 import Cart from './cart';
 import Customer from './customer';
+import Payment from './payment';
 import Shipping from './shipping';
 
 export default class CheckoutComponent extends React.PureComponent {
@@ -28,6 +29,7 @@ export default class CheckoutComponent extends React.PureComponent {
             this.service.loadShippingCountries(),
             this.service.loadShippingOptions(),
             this.service.loadBillingCountries(),
+            this.service.loadPaymentMethods(),
         ]).then(() => this.setState({ isFirstLoad: false }));
 
         this.unsubscribe = this.service.subscribe((state) => {
@@ -80,7 +82,25 @@ export default class CheckoutComponent extends React.PureComponent {
                     address={ checkout.getBillingAddress() }
                     countries={ checkout.getBillingCountries() }
                     onUpdate={ (address) => this.service.updateBillingAddress(address) } />
+
+                <Payment
+                    methods={ checkout.getPaymentMethods() }
+                    errors={ errors.getSubmitOrderError() }
+                    onChange={ (name, gateway) => this.service.initializePaymentMethod(name, gateway) }
+                    onSubmit={ (...args) => this._handleSubmitPayment(...args) } />
             </section>
         );
+    }
+
+    _handleSubmitPayment(name, gateway, paymentData) {
+        const payload = {
+            payment: {
+                name,
+                gateway,
+                paymentData,
+            },
+        };
+
+        this.service.submitOrder(payload);
     }
 }
