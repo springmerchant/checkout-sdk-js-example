@@ -1,0 +1,40 @@
+{
+  "name": "@bigcommerce/checkout-sdk-example",
+  "version": "0.1.0",
+  "description": "BigCommerce Checkout JavaScript SDK Example",
+  "license": "MIT",
+  "private": true,
+  "main": "dist/main.js",
+  "files": [
+    "dist/"
+  ],
+  "engines": {
+    "node": "^6.10.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/bigcommerce/checkout-sdk-js-example.git"
+  },
+  "author": "BigCommerce",
+  "bugs": {
+    "url": "https://github.com/bigcommerce/checkout-sdk-js-example/issues"
+  },
+  "homepage": "https://github.com/bigcommerce/checkout-sdk-js-example",
+  "scripts": {
+    "dev": "webpack --mode development --watch",
+    "transpile": "webpack"
+  },
+  "devDependencies": {
+    "@bigcommerce/checkout-sdk": "git+ssh://git@github.com/bigcommerce/checkout-sdk-js.git",
+    "accounting": "^0.4.1",
+    "babel-core": "^6.26.0",
+    "babel-loader": "^7.1.4",
+    "babel-preset-env": "^1.6.1",
+    "babel-preset-react": "^6.24.1",
+    "material-ui": "^1.0.0-beta.40",
+    "react": "^16.3.1",
+    "react-dom": "^16.3.1",
+    "webpack": "^4.5.0",
+    "webpack-cli": "^2.0.14"
+  }
+}
