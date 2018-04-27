@@ -1,92 +1,54 @@
-import React from 'react';
-import { SnackbarContent } from 'material-ui/Snackbar';
-import Button from 'material-ui/Button';
-import TextField from 'material-ui/TextField';
-import Typography from 'material-ui/Typography';
+import React, { Fragment } from 'react';
+import Alert from "./components/alert";
+import EmailInput from './components/email-input';
+import PasswordInput from './components/password-input';
+import Section from './components/section';
 
-export default class CustomerComponent extends React.PureComponent {
+export default class Customer extends React.PureComponent {
     constructor(props) {
         super(props);
 
         this.state = {
             email: '',
-            password: '',
         };
+    }
+
+    componentDidMount() {
+        if (this.props.customer.email) {
+            this.setState({
+                email: this.props.customer.email,
+            });
+        }
+    }
+
+    componentDidUpdate() {
+        this.props.onChange(this.state);
     }
 
     render() {
         return (
-            <form onSubmit={ (...args) => this._handleSubmit(...args) } noValidate>
-                <Typography type="display1" gutterBottom>
-                    Customer
-                </Typography>
+            <Section
+                header={ 'Customer' }
+                body={
+                    <Fragment>
+                        { this.props.errors &&
+                            <Alert body={ this.props.errors.body.detail } />
+                        }
 
-                { this.props.error && <SnackbarContent message={ this.props.error.body.detail } /> }
+                        <EmailInput
+                            id={ 'customerEmail' }
+                            label={ 'Email' }
+                            value={ this.state.email }
+                            onChange={ ({target}) => this.setState({email: target.value}) } />
 
-                { this.props.customer.isGuest &&
-                    <TextField
-                        label="Email"
-                        type="email"
-                        value={this.state.email}
-                        onChange={(...args) => this._handleEmailChange(...args)}
-                        autoComplete="email"
-                        margin="normal" />
-                }
+                        <PasswordInput
+                            id={ 'customerPassword' }
+                            label={ 'Password' }
+                            value={ this.state.password }
+                            onChange={ ({target})=>this.setState({password: target.value}) } />
 
-                { this.props.customer.isGuest &&
-                    <TextField
-                        label="Password"
-                        type="password"
-                        value={ this.state.password }
-                        onChange={ (...args) => this._handlePasswordChange(...args) }
-                        margin="normal" />
-                }
-
-                { this.props.customer.isGuest &&
-                    <Button type="submit">
-                        Sign in
-                    </Button>
-                }
-
-                { this.props.customer.isGuest === false &&
-                    <Typography type="display2" gutterBottom>
-                        You are signed in as { this.props.customer.email }
-                    </Typography>
-                }
-
-                { this.props.customer.isGuest === false &&
-                    <Button onClick={ (...args) => this._handleSignOut(...args) }>
-                        Sign out
-                    </Button>
-                }
-            </form>
+                    </Fragment>
+                } />
         );
-    }
-
-    _handleEmailChange({ target }) {
-        this.setState({
-            email: target.value,
-        });
-    }
-
-    _handlePasswordChange({ target }) {
-        this.setState({
-            password: target.value,
-        });
-    }
-
-    _handleSubmit(event) {
-        event.preventDefault();
-
-        this.props.onSignIn({
-            email: this.state.email,
-            password: this.state.password || null,
-        });
-    }
-
-    _handleSignOut(event) {
-        event.preventDefault();
-
-        this.props.onSignOut();
     }
 }

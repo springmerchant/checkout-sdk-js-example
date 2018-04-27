@@ -1,5 +1,7 @@
 module.exports = {
-    entry: './src/checkout.jsx',
+    entry: [
+        './src/index.jsx',
+    ],
     module: {
         rules: [
             {

@@ -1,13 +1,34 @@
 import React from 'react';
 import { createCheckoutService } from '@bigcommerce/checkout-sdk';
-import Snackbar from 'material-ui/Snackbar';
-import Billing from './billing';
+import { formatMoney } from 'accounting';
+import LoadingModal from "./components/loading-modal";
+import SubmitButton from "./components/submit-button";
 import Cart from './cart';
 import Customer from './customer';
-import Payment from './payment';
 import Shipping from './shipping';
+import Billing from './billing';
+import Payment from './payment';
 
-export default class CheckoutComponent extends React.PureComponent {
+const main = {
+    backgroundColor: '#f5f5f5',
+    display: 'flex',
+    padding: '32px 250px',
+};
+
+const container = {
+    backgroundColor: '#ffffff',
+    borderRadius: '8px',
+    boxShadow: '0 2px 8px #0000002e',
+    flex: '1',
+    marginRight: '20px',
+    padding: '20px',
+};
+
+const actionContainer = {
+    padding: '24px',
+};
+
+export default class Checkout extends React.PureComponent {
     constructor(props) {
         super(props);
 
@@ -20,7 +41,9 @@ export default class CheckoutComponent extends React.PureComponent {
             },
         });
 
-        this.state = { isFirstLoad: true };
+        this.state = {
+            isFirstLoad: true,
+        };
     }
 
     componentDidMount() {
@@ -46,62 +69,70 @@ export default class CheckoutComponent extends React.PureComponent {
 
         if (this.state.isFirstLoad) {
             return (
-                <Snackbar
-                    anchorOrigin={ { vertical: 'top', horizontal: 'center' } }
-                    open={ true }
-                    message="Loading..."/>
+                <LoadingModal />
             );
         }
 
         return (
-            <section>
-                { statuses.isPending() &&
-                    <Snackbar
-                        anchorOrigin={ { vertical: 'top', horizontal: 'center' } }
-                        open={ true }
-                        message="Loading..."/>
-                }
+            <main style={ main }>
+                <div style={ container }>
+                    <form onSubmit={ (event) => this._submitOrder(event) }>
+                        <Customer
+                            customer={ checkout.getCustomer() }
+                            errors={ errors.getSignInError() }
+                            onChange={ (customer) => this.setState({ customer }) } />
 
-                <Cart cart={ checkout.getCart() }/>
+                        <Shipping
+                            address={ checkout.getShippingAddress() }
+                            countries={ checkout.getShippingCountries() }
+                            options={ checkout.getShippingOptions() }
+                            selectedOptionId={ checkout.getSelectedShippingOption() ? checkout.getSelectedShippingOption().id : '' }
+                            isSelectingShippingOption ={ statuses.isSelectingShippingOption() }
+                            isUpdatingShippingAddress={ statuses.isUpdatingShippingAddress() }
+                            onChange ={ (shippingAddress) => this.setState({ shippingAddress }) }
+                            onSelect={ (addressId, optionId) => this.service.selectShippingOption(addressId, optionId) }
+                            onAddressChange={ (address) => this.service.updateShippingAddress(address) } />
 
-                <Customer
-                    customer={ checkout.getCustomer() }
-                    error={ errors.getSignInError() }
-                    onSignIn={ (credentials) => this.service.signInCustomer(credentials) }
-                    onSignOut={ () => this.service.signOutCustomer() }/>
+                        <Payment
+                            methods={ checkout.getPaymentMethods() }
+                            errors={ errors.getSubmitOrderError() }
+                            onChange={ (payment) => this.setState({ payment }) }
+                            onClick={ (name, gateway) => this.service.initializePaymentMethod(name, gateway) } />
 
-                <Shipping
-                    address={ checkout.getShippingAddress() }
-                    countries={ checkout.getShippingCountries() }
-                    options={ checkout.getShippingOptions() }
-                    selectedOptionId={ checkout.getSelectedShippingOption() ? checkout.getSelectedShippingOption().id : '' }
-                    onSelect={ (addressId, optionId) => this.service.selectShippingOption(addressId, optionId) }
-                    onUpdate={ (address) => this.service.updateShippingAddress(address) } />
+                        <Billing
+                            address={ checkout.getBillingAddress() }
+                            countries={ checkout.getBillingCountries() }
+                            onChange ={ (billingAddress) => this.setState({ billingAddress }) }
+                            onSelect ={ (billingAddressSameAsShippingAddress) => this.setState({ billingAddressSameAsShippingAddress })  } />
 
-                <Billing
-                    address={ checkout.getBillingAddress() }
-                    countries={ checkout.getBillingCountries() }
-                    onUpdate={ (address) => this.service.updateBillingAddress(address) } />
+                        <div style={ actionContainer }>
+                            <SubmitButton
+                                label={ statuses.isSubmittingOrder() ? 'Placing your order...' : `Pay ${ formatMoney((checkout.getCart()).grandTotal.amount) }` }
+                                isLoading={ statuses.isSubmittingOrder() }/>
+                        </div>
+                    </form>
+                </div>
 
-                <Payment
-                    methods={ checkout.getPaymentMethods() }
-                    errors={ errors.getSubmitOrderError() }
-                    onChange={ (name, gateway) => this.service.initializePaymentMethod(name, gateway) }
-                    onSubmit={ (...args) => this._handleSubmitPayment(...args) } />
-            </section>
+                <Cart
+                    cart={ checkout.getCart() }
+                    cartLink={ (checkout.getConfig()).storeConfig.links.cartLink } />
+            </main>
         );
     }
 
-    _handleSubmitPayment(name, gateway, paymentData) {
-        const payload = {
-            payment: {
-                name,
-                gateway,
-                paymentData,
-            },
-        };
+    _submitOrder(event) {
+        event.preventDefault();
 
-        this.service.submitOrder(payload)
+        let billingAddressPayload = this.state.billingAddressSameAsShippingAddress ? this.state.shippingAddress : this.state.billingAddress;
+
+        let { payment } = this.state;
+
+        Promise.all([
+            this.service.signInCustomer(this.state.customer),
+            this.service.updateShippingAddress(this.state.shippingAddress),
+            this.service.updateBillingAddress(billingAddressPayload),
+        ])
+            .then(() => this.service.submitOrder({ payment }))
             .then(({ checkout }) => {
                 const { storeConfig } = checkout.getConfig();
                 window.location.href = storeConfig.links.orderConfirmationLink;

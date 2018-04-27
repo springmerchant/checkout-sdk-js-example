@@ -1,64 +1,48 @@
-import React from 'react';
-import Button from 'material-ui/Button';
-import Typography from 'material-ui/Typography';
-import Address from './address';
-import ShippingOptions from './shipping-options';
+import React, { Fragment } from 'react';
+import Section from "./components/section";
+import Address from './shipping-address';
+import EmptyState from "./components/empty-state";
+import RadioContainer from "./components/radio-container";
+import RadioInput from "./components/radio-input";
 
-export default class ShippingComponent extends React.PureComponent {
-    constructor(props) {
-        super(props);
-
-        this.state = {
-            selectedOptionId: null,
-        };
-    }
-
-    componentDidMount() {
-        if (this.props.selectedOptionId !== this.state.selectedOptionId) {
-            this.setState({ selectedOptionId: this.props.selectedOptionId });
-        }
-    }
-
+export default class Shipping extends React.PureComponent {
     render() {
         return (
-            <form onSubmit={ (...args) => this._handleSubmit(...args) } noValidate>
-                <Typography type="display1" gutterBottom>
-                    Shipping
-                </Typography>
+            <Section
+                header={ 'Shipping' }
+                body={
+                    <Fragment>
+                        <Address
+                            address={ this.props.address }
+                            countries={ this.props.countries }
+                            hasShippingOptions={ !!this.props.options[this.props.address.id] }
+                            onChange={ (address) => this.props.onChange(address) }
+                            onAddressChange={ (address) => this.props.onAddressChange(address) } />
 
-                <Address
-                    address={ this.props.address }
-                    countries={ this.props.countries }
-                    onChange={ (...args) => this._handleAddressChange(...args) } />
+                        <RadioContainer
+                            label={ 'Shipping Option' }
+                            body={
+                                <Fragment>
+                                    { !this.props.options[this.props.address.id] &&
+                                        <EmptyState
+                                            body={ 'Sorry, there is no available shipping option.' }
+                                            isLoading={ this.props.isUpdatingShippingAddress } />
+                                    }
 
-                <ShippingOptions
-                    address={ this.props.address }
-                    options={ this.props.options }
-                    selectedOptionId={ this.state.selectedOptionId }
-                    onOptionSelect={ (...args) => this._handleOptionSelect(...args) } />
-
-                <Button type="submit">
-                    Save
-                </Button>
-            </form>
+                                    { this.props.options[this.props.address.id] && (this.props.options[this.props.address.id]).map(option => (
+                                        <RadioInput
+                                            key={ option.id }
+                                            name={ 'shippingOption' }
+                                            value={ option.id }
+                                            checked={ this.props.selectedOptionId === option.id }
+                                            label={ `${ option.description } - ${ option.formattedPrice }` }
+                                            isLoading={ this.props.isSelectingShippingOption || this.props.isUpdatingShippingAddress }
+                                            onChange={ () => this.props.onSelect(this.props.address.id, option.id) } />
+                                    )) }
+                                </Fragment>
+                            } />
+                    </Fragment>
+                } />
         );
-    }
-
-    _handleAddressChange(address) {
-        this._updatedAddress = address;
-    }
-
-    _handleOptionSelect(optionId) {
-        this.setState({
-            selectedOptionId: optionId,
-        });
-
-        this.props.onSelect(this.props.address.id, optionId);
-    }
-
-    _handleSubmit(event) {
-        event.preventDefault();
-
-        this.props.onUpdate(this._updatedAddress || this.props.address);
     }
 }

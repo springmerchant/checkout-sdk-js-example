@@ -1,61 +1,111 @@
 import React from 'react';
 import { formatMoney } from 'accounting';
-import Avatar from 'material-ui/Avatar';
-import Divider from 'material-ui/Divider';
-import List, { ListItem, ListItemText, ListItemSecondaryAction } from 'material-ui/List';
-import Typography from 'material-ui/Typography';
+import ItemLine from "./components/item-line";
 
-export default class CartComponent extends React.PureComponent {
+const cart = {
+    alignSelf: 'flex-start',
+    backgroundColor: '#ffffff',
+    borderRadius: '8px',
+    boxShadow: '0 2px 8px #0000002e',
+};
+
+const cartSection = {
+    padding: '24px 20px',
+};
+
+const cartHeaderSection = {
+    borderBottom: '1px solid #e7e7e7',
+    display: 'flex',
+    marginBottom: '24px',
+    paddingBottom: '12px',
+};
+
+const cartHeader = {
+    flex: 1,
+    fontSize: '24px',
+    fontWeight: 500,
+};
+
+const cartAction = {
+    color: '#84898d',
+    fontWeight: '600',
+    textTransform: 'uppercase',
+    alignSelf: 'flex-end',
+};
+
+const orderSummarySection = {
+    backgroundColor: '#f1f5f8',
+    borderBottomLeftRadius: '8px',
+    borderBottomRightRadius: '8px',
+    padding: '12px 20px',
+};
+
+const grandtotalContainer = {
+    backgroundColor: '#f1f5f8',
+    borderTop: '1px solid #e7e7e7',
+    display: 'flex',
+    padding: '12px 0',
+};
+
+const grandtotalLabel = {
+    alignSelf: 'center',
+    flexGrow: '1',
+    fontSize: '20px',
+    fontWeight: '600',
+};
+
+const grandtotalAmount = {
+    fontSize: '24px',
+    fontWeight: '700',
+};
+
+export default class Cart extends React.PureComponent {
     render() {
         return (
-            <div>
-                <Typography type="display1" gutterBottom>
-                    Cart
-                </Typography>
+            <div style={ cart }>
+                <div style={ cartSection }>
+                    <div style={ cartHeaderSection }>
+                        <div style={ cartHeader }>
+                            Your Order
+                        </div>
 
-                <List>
+                        <a href={ this.props.cartLink } style={ cartAction }>
+                            Return to cart
+                        </a>
+                    </div>
+
                     { (this.props.cart.items || []).map((item) => (
-                        <ListItem key={ item.id }>
-                            <Avatar src={ item.imageUrl } />
-                            <ListItemText primary={ `${item.quantity} x ${item.name}` } />
-                            <ListItemSecondaryAction>
-                                { formatMoney(item.amountAfterDiscount) }
-                            </ListItemSecondaryAction>
-                        </ListItem>
+                        <ItemLine
+                            key={ item.id }
+                            label={ `${ item.quantity } x ${ item.name }` }
+                            amount={ formatMoney(item.amountAfterDiscount) }
+                            imageUrl={ item.imageUrl }/>
                     )) }
+                </div>
 
-                    <Divider />
+                <div style={ orderSummarySection }>
+                    <ItemLine
+                        label={ 'Subtotal' }
+                        amount={ formatMoney(this.props.cart.subtotal.amount) } />
 
-                    <ListItem>
-                        <ListItemText primary="Subtotal" />
-                        <ListItemSecondaryAction>
-                            { formatMoney(this.props.cart.subtotal.amount) }
-                        </ListItemSecondaryAction>
-                    </ListItem>
+                    <ItemLine
+                        label={ 'Shipping' }
+                        amount={ formatMoney(this.props.cart.shipping.amount) } />
 
-                    <ListItem>
-                        <ListItemText primary="Shipping" />
-                        <ListItemSecondaryAction>
-                            { formatMoney(this.props.cart.shipping.amount) }
-                        </ListItemSecondaryAction>
-                    </ListItem>
+                    <ItemLine
+                        label={ 'Tax' }
+                        amount={ formatMoney(this.props.cart.taxTotal.amount) } />
 
-                    <ListItem>
-                        <ListItemText primary="Tax" />
-                        <ListItemSecondaryAction>
-                            { formatMoney(this.props.cart.taxTotal.amount) }
-                        </ListItemSecondaryAction>
-                    </ListItem>
+                    <div style={ grandtotalContainer }>
+                        <div style={ grandtotalLabel }>
+                            Total
+                        </div>
 
-                    <Divider />
-
-                    <ListItem>
-                        <ListItemText primary="Total" />
-                        <ListItemSecondaryAction>
+                        <div style={ grandtotalAmount }>
                             { formatMoney(this.props.cart.grandTotal.amount) }
-                        </ListItemSecondaryAction>
-                    </ListItem>
-                </List>
+                        </div>
+                    </div>
+                </div>
             </div>
         );
     }

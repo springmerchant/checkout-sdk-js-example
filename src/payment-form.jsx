@@ -1,7 +1,14 @@
 import React from 'react';
-import TextField from 'material-ui/TextField';
+import TextInput from './components/text-input';
 
-export default class PaymentFormComponent extends React.PureComponent {
+const div = {
+    display: 'flex',
+    flexFlow: 'row wrap',
+    marginLeft: '-12px',
+    marginRight: '-12px',
+};
+
+export default class PaymentForm extends React.PureComponent {
     constructor(props) {
         super(props);
 
@@ -16,50 +23,60 @@ export default class PaymentFormComponent extends React.PureComponent {
                 },
                 ccType: '',
             },
-            expiryDate: '/',
+            expiration: '',
         };
     }
 
     render() {
         return (
-            <div>
-                <TextField
-                    label="Credit Card Number"
+            <div style={ div }>
+                <TextInput
+                    id={ `${ this.props.methodId }-paymentCCNumber` }
+                    label={ 'Credit Card Number' }
                     value={ this.state.creditCard.ccNumber }
-                    onChange={ this._handleCreditCardChange('ccNumber') }
-                    autoComplete="cc-number"
-                    margin="normal"
-                    required />
+                    // onChange={ ({ target }) => this.props.onChange({ ccNumber: target.value }) }
+                    onChange={ ({ target }) => this._onChange('ccNumber', target.value) }
+                    width={ 'twoThird' } />
 
-                <TextField
-                    label="Expiration"
-                    value={ this.state.expiryDate }
-                    onChange={ (event) => this._handleExpiryChange(event) }
-                    autoComplete="cc-exp"
-                    margin="normal"
-                    required />
+                <TextInput
+                    id={ `${ this.props.methodId }-paymentExpiration` }
+                    label={ 'Expiration' }
+                    value={ this.state.expiration }
+                    onChange={ ({ target }) => this._onExpiryChange(target.value) }
+                    placeholder={ 'MM/YY' }
+                    width={ 'oneThird' } />
 
-                <TextField
-                    label="Name on card"
+                <TextInput
+                    id={ `${ this.props.methodId }-paymentCCName` }
+                    label={ 'Name on card' }
                     value={ this.state.creditCard.ccName }
-                    onChange={ this._handleCreditCardChange('ccName') }
-                    autoComplete="cc-name"
-                    margin="normal"
-                    required />
+                    onChange={ ({ target }) => this._onChange('ccName', target.value) }
+                    width={ 'twoThird' } />
 
-                <TextField
-                    label="CVV"
+                <TextInput
+                    id={ `${ this.props.methodId }-paymentCCV` }
+                    label={ 'CVV' }
                     value={ this.state.creditCard.ccCvv }
-                    onChange={ this._handleCreditCardChange('ccCvv') }
-                    autoComplete="cc-cvv"
-                    margin="normal"
-                    required />
+                    onChange={ ({ target }) => this._onChange('ccCvv', target.value) }
+                    width={ 'oneThird' } />
             </div>
         );
     }
 
-    _handleExpiryChange({ target }) {
-        const [month, year] = target.value.split('/');
+    _onChange(fieldName, value) {
+        const creditCard = Object.assign(
+            {},
+            this.state.creditCard,
+            { [fieldName]: value },
+        );
+
+        this.setState({ creditCard });
+
+        this.props.onChange(this.state.creditCard);
+    }
+
+    _onExpiryChange(value) {
+        const [month, year] = value.split('/');
 
         const creditCard = Object.assign(
             {},
@@ -68,28 +85,15 @@ export default class PaymentFormComponent extends React.PureComponent {
                 ccExpiry: {
                     month,
                     year,
-                },
-            },
+                }
+             },
         );
 
         this.setState({
-            creditCard,
-            expiryDate: target.value,
+            creditCard: creditCard,
+            expiration: value,
         });
 
-        this.props.onChange(creditCard);
-    }
-
-    _handleCreditCardChange(fieldName) {
-        return ({ target }) => {
-            const creditCard = Object.assign(
-                {},
-                this.state.creditCard,
-                { [fieldName]: target.value },
-            );
-
-            this.setState({ creditCard });
-            this.props.onChange(creditCard);
-        };
+        this.props.onChange(this.state.creditCard);
     }
 }

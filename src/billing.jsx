@@ -1,35 +1,62 @@
-import React from 'react';
-import Button from 'material-ui/Button';
-import Typography from 'material-ui/Typography';
-import Address from './address';
+import React, { Fragment } from 'react';
+import RadioContainer from './components/radio-container';
+import RadioInput from './components/radio-input';
+import Section from './components/section';
+import Address from './billing-address';
 
-export default class BillingComponent extends React.PureComponent {
+export default class Billing extends React.PureComponent {
+    constructor(props) {
+        super(props);
+
+        this.state = {
+            sameAsShippingAddress: true,
+        };
+    }
+
+    componentDidUpdate() {
+        this.props.onSelect(this.state.sameAsShippingAddress);
+    }
+
     render() {
         return (
-            <form onSubmit={ (...args) => this._handleSubmit(...args) } noValidate>
-                <Typography type="display1" gutterBottom>
-                    Billing
-                </Typography>
+            <Section
+                header={ 'Billing' }
+                body={
+                    <Fragment>
+                        <RadioContainer
+                            label={ 'Billing Address' }
+                            body={
+                                <Fragment>
+                                    <RadioInput
+                                        name={ 'sameAsShippingAddress' }
+                                        value={ 'true' }
+                                        checked={ this.state.sameAsShippingAddress }
+                                        label={ 'Same as shipping address' }
+                                        onChange={ ({ target }) => this._onChange(target.value) } />
 
-                <Address
-                    address={ this.props.address }
-                    countries={ this.props.countries }
-                    onChange={ (formData) => this._handleAddressChange(formData) } />
+                                    <RadioInput
+                                        name={ 'sameAsShippingAddress' }
+                                        value={ 'false' }
+                                        checked={ !this.state.sameAsShippingAddress }
+                                        label={ 'Use a different billing address' }
+                                        onChange={ ({ target }) => this._onChange(target.value) } />
+                                </Fragment>
+                            } />
 
-                <Button type="submit">
-                    Save
-                </Button>
-            </form>
+                        { this.state.sameAsShippingAddress === false &&
+                            <Address
+                                address={ this.props.address }
+                                countries={ this.props.countries }
+                                onChange={ (address) => this.props.onChange(address) } />
+                        }
+                    </Fragment>
+                } />
         );
     }
 
-    _handleAddressChange(address) {
-        this._updatedAddress = address;
-    }
+    _onChange(value) {
+        const actualValue = (value === 'true');
 
-    _handleSubmit(event) {
-        event.preventDefault();
-
-        this.props.onUpdate(this._updatedAddress || this.props.address);
+        this.setState({ sameAsShippingAddress: actualValue });
     }
 }
