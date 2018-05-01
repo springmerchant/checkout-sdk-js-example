@@ -1,8 +1,10 @@
 import React from 'react';
 
 const container = {
+    backgroundColor: '#f5f5f5',
     display: 'flex',
     justifyContent: 'center',
+    padding: '32px 0',
 };
 
 const div = {

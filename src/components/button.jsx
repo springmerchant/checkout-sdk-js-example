@@ -1,28 +1,24 @@
 import React from 'react';
 
 const container = {
-    backgroundColor: '#444444',
+    border: '1px solid #e7e7e7',
     borderRadius: '4px',
-    color: '#ffffff',
-    fontSize: '16px',
-    fontWeight: '700',
-    letterSpacing: '0.3px',
-    padding: '12px',
-    width: '100%',
+    padding: '8px 12px',
 };
 
 const loadingState = {
     opacity: '0.5',
 };
 
-export default class SubmitButton extends React.PureComponent {
+export default class Button extends React.PureComponent {
     render() {
         const button = this.props.isLoading ? Object.assign({}, container, loadingState) : container;
 
         return (
             <button
-                type="submit"
+                type="button"
                 disabled={ this.props.isLoading }
+                onClick={ this.props.onClick }
                 style={ button }>
                 { this.props.label }
             </button>

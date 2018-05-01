@@ -1,7 +1,7 @@
 import React from 'react';
 
 const div = {
-    flexBasis: '50%',
+    flexBasis: '100%',
     marginBottom: '12px',
     paddingLeft: '12px',
     paddingRight: '12px',
@@ -40,7 +40,7 @@ export default class EmailInput extends React.PureComponent {
                 <input
                     type="email"
                     id={ this.props.id }
-                    value={ this.props.value }
+                    value={ this.props.value || '' }
                     required
                     onChange={ this.props.onChange }
                     style={ input } />

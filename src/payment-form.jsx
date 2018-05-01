@@ -1,4 +1,5 @@
 import React from 'react';
+import MaskedTextInput from './components/masked-text-input';
 import TextInput from './components/text-input';
 
 const div = {
@@ -23,27 +24,27 @@ export default class PaymentForm extends React.PureComponent {
                 },
                 ccType: '',
             },
-            expiration: '',
+            expiry: '',
         };
     }
 
     render() {
         return (
             <div style={ div }>
-                <TextInput
+                <MaskedTextInput
                     id={ `${ this.props.methodId }-paymentCCNumber` }
                     label={ 'Credit Card Number' }
                     value={ this.state.creditCard.ccNumber }
-                    // onChange={ ({ target }) => this.props.onChange({ ccNumber: target.value }) }
-                    onChange={ ({ target }) => this._onChange('ccNumber', target.value) }
+                    mask={ [/[0-9]/, /[0-9]/, /[0-9]/, /[0-9]/, ' ', /[0-9]/, /[0-9]/, /[0-9]/, /[0-9]/, ' ', /[0-9]/, /[0-9]/, /[0-9]/, /[0-9]/, ' ', /[0-9]/, /[0-9]/, /[0-9]/, /[0-9]/,] }
+                    onChange={ ({ target }) => this._onChange('ccNumber', target.value.replace(/\s/g, '')) }
                     width={ 'twoThird' } />
 
-                <TextInput
-                    id={ `${ this.props.methodId }-paymentExpiration` }
-                    label={ 'Expiration' }
-                    value={ this.state.expiration }
+                <MaskedTextInput
+                    id={ `${ this.props.methodId }-paymentExpiry` }
+                    label={ 'Expiry' }
+                    value={ this.state.expiry }
+                    mask={ [/[0-9]/, /[0-9]/, '/', /[0-9]/, /[0-9]/,] }
                     onChange={ ({ target }) => this._onExpiryChange(target.value) }
-                    placeholder={ 'MM/YY' }
                     width={ 'oneThird' } />
 
                 <TextInput
@@ -53,11 +54,13 @@ export default class PaymentForm extends React.PureComponent {
                     onChange={ ({ target }) => this._onChange('ccName', target.value) }
                     width={ 'twoThird' } />
 
-                <TextInput
+                <MaskedTextInput
                     id={ `${ this.props.methodId }-paymentCCV` }
                     label={ 'CVV' }
                     value={ this.state.creditCard.ccCvv }
-                    onChange={ ({ target }) => this._onChange('ccCvv', target.value) }
+                    optional={ true }
+                    mask={ [/[0-9]/, /[0-9]/, /[0-9]/, /[0-9]/,] }
+                    onChange={ ({ target }) => this._onChange('ccCvv', target.value.replace(/\s/g, '')) }
                     width={ 'oneThird' } />
             </div>
         );
@@ -72,11 +75,11 @@ export default class PaymentForm extends React.PureComponent {
 
         this.setState({ creditCard });
 
-        this.props.onChange(this.state.creditCard);
+        this.props.onChange(creditCard);
     }
 
     _onExpiryChange(value) {
-        const [month, year] = value.split('/');
+        const [month, year] = value.replace(/\s/g, '').split('/');
 
         const creditCard = Object.assign(
             {},
@@ -91,9 +94,9 @@ export default class PaymentForm extends React.PureComponent {
 
         this.setState({
             creditCard: creditCard,
-            expiration: value,
+            expiry: value,
         });
 
-        this.props.onChange(this.state.creditCard);
+        this.props.onChange(creditCard);
     }
 }

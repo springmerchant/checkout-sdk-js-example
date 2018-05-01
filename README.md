@@ -5,12 +5,41 @@ This repository features a React example that uses [Bigcommerce's Checkout JS SD
 
 ## Getting Started
 
-For a quick demo or to give the [Checkout JS SDK](https://github.com/bigcommerce/checkout-sdk-js) a try, you will need to add the following to the page where you want the checkout to render:
+### Installation
 
-```html
+You can install this example using [npm](https://www.npmjs.com/get-npm):
+
+```
+npm install --save @bigcommerce/checkout-sdk-example
+```
+
+or via CDN:
+
+```
 <script src="https://cdn8.bigcommerce.com/s-wmv3nwatp6/content/main.js"></script>
+```
 
+
+### Usage
+
+Add a `<div>` element with the id of `checkout-app` to the page where you want the checkout to render:
+
+```
 <div id="checkout-app"></div>
+```
+
+## Development
+
+To run this example locally, simply run the following:
+
+```
+npm install && npm run dev
+```
+
+To build:
+
+```
+npm run transpile
 ```
 
 

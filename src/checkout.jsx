@@ -1,13 +1,14 @@
 import React from 'react';
 import { createCheckoutService } from '@bigcommerce/checkout-sdk';
 import { formatMoney } from 'accounting';
-import LoadingModal from "./components/loading-modal";
-import SubmitButton from "./components/submit-button";
+import LoadingState from './components/loading-state';
+import SubmitButton from './components/submit-button';
+import Billing from './billing';
 import Cart from './cart';
 import Customer from './customer';
-import Shipping from './shipping';
-import Billing from './billing';
+import CustomerForm from './customer-form';
 import Payment from './payment';
+import Shipping from './shipping';
 
 const main = {
     backgroundColor: '#f5f5f5',
@@ -32,22 +33,18 @@ export default class Checkout extends React.PureComponent {
     constructor(props) {
         super(props);
 
-        this.service = createCheckoutService({
-            config: {
-                bigpayBaseUrl: 'https://bigpay.integration.zone',
-                storeHash: '7xcbg28tsc',
-                storeId: 12077240,
-                storeName: 'robin.ong+1521680812 testsworthy',
-            },
-        });
+        this.service = createCheckoutService();
 
         this.state = {
             isFirstLoad: true,
+            isPlacingOrder: false,
+            isSigningIn: false,
         };
     }
 
     componentDidMount() {
         Promise.all([
+            this.service.loadConfig(),
             this.service.loadCheckout(),
             this.service.loadShippingCountries(),
             this.service.loadShippingOptions(),
@@ -69,18 +66,34 @@ export default class Checkout extends React.PureComponent {
 
         if (this.state.isFirstLoad) {
             return (
-                <LoadingModal />
+                <LoadingState />
+            );
+        }
+
+        if (this.state.isSigningIn) {
+            return (
+                <div style={ main }>
+                    <div style={ container }>
+                        <CustomerForm
+                            errors={ errors.getSignInError() }
+                            onClose={ () => this.setState({ isSigningIn: false }) }
+                            signIn={ (customer) => this.service.signInCustomer(customer) }
+                            isSigningIn={ statuses.isSigningIn() } />
+                    </div>
+                </div>
             );
         }
 
         return (
             <main style={ main }>
                 <div style={ container }>
-                    <form onSubmit={ (event) => this._submitOrder(event) }>
+                    <form onSubmit={ (event) => this._submitOrder(event, checkout.getCustomer().isGuest) }>
                         <Customer
                             customer={ checkout.getCustomer() }
-                            errors={ errors.getSignInError() }
-                            onChange={ (customer) => this.setState({ customer }) } />
+                            onChange={ (customer) => this.setState({ customer }) }
+                            onClick={ () => this.setState({ isSigningIn: true }) }
+                            signOut={ () => this.service.signOutCustomer() }
+                            isSigningOut={ statuses.isSigningOut() } />
 
                         <Shipping
                             address={ checkout.getShippingAddress() }
@@ -97,7 +110,7 @@ export default class Checkout extends React.PureComponent {
                             methods={ checkout.getPaymentMethods() }
                             errors={ errors.getSubmitOrderError() }
                             onChange={ (payment) => this.setState({ payment }) }
-                            onClick={ (name, gateway) => this.service.initializePaymentMethod(name, gateway) } />
+                            onClick={ (name, gateway) => this.service.initializePayment({ methodId: name, gatewayId: gateway }) } />
 
                         <Billing
                             address={ checkout.getBillingAddress() }
@@ -107,35 +120,38 @@ export default class Checkout extends React.PureComponent {
 
                         <div style={ actionContainer }>
                             <SubmitButton
-                                label={ statuses.isSubmittingOrder() ? 'Placing your order...' : `Pay ${ formatMoney((checkout.getCart()).grandTotal.amount) }` }
-                                isLoading={ statuses.isSubmittingOrder() }/>
+                                label={ this.state.isPlacingOrder && (statuses.isSigningIn() || statuses.isUpdatingShippingAddress() || statuses.isUpdatingBillingAddress() || statuses.isSubmittingOrder()) ?
+                                    'Placing your order...' : `Pay ${ formatMoney((checkout.getCart()).grandTotal.amount) }` }
+                                isLoading={ this.state.isPlacingOrder && (statuses.isSigningIn() || statuses.isUpdatingShippingAddress() || statuses.isUpdatingBillingAddress() || statuses.isSubmittingOrder()) }/>
                         </div>
                     </form>
                 </div>
 
                 <Cart
                     cart={ checkout.getCart() }
-                    cartLink={ (checkout.getConfig()).storeConfig.links.cartLink } />
+                    cartLink={ (checkout.getConfig()).links.cartLink } />
             </main>
         );
     }
 
-    _submitOrder(event) {
+    _submitOrder(event, isGuest) {
         event.preventDefault();
+
+        this.setState({ isPlacingOrder: true });
 
         let billingAddressPayload = this.state.billingAddressSameAsShippingAddress ? this.state.shippingAddress : this.state.billingAddress;
 
         let { payment } = this.state;
 
         Promise.all([
-            this.service.signInCustomer(this.state.customer),
+            isGuest ? this.service.signInCustomer(this.state.customer) : Promise.resolve(),
             this.service.updateShippingAddress(this.state.shippingAddress),
             this.service.updateBillingAddress(billingAddressPayload),
         ])
             .then(() => this.service.submitOrder({ payment }))
             .then(({ checkout }) => {
-                const { storeConfig } = checkout.getConfig();
-                window.location.href = storeConfig.links.orderConfirmationLink;
-            });
+                window.location.href = checkout.getConfig().links.orderConfirmationLink;
+            })
+            .catch(() => this.setState({ isPlacingOrder: false }));
     }
 }
