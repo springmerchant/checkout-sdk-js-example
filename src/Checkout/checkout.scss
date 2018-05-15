@@ -1,0 +1,21 @@
+.body {
+    flex-basis: 66.67%;
+
+    @media (max-width: 990px) {
+        flex-basis: 100%;
+    }
+}
+
+.side {
+    flex-basis: 33.33%;
+    padding-left: 20px;
+
+    @media (max-width: 990px) {
+        flex-basis: 100%;
+        padding-bottom: 20px;
+    }
+}
+
+.actionContainer {
+    padding: 24px;
+}

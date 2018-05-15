@@ -39,7 +39,7 @@ npm install && npm run dev
 To build:
 
 ```
-npm run transpile
+npm run build
 ```
 
 

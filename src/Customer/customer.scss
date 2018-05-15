@@ -1,0 +1,16 @@
+.actionContainer {
+    font-size: 12px;
+    margin-left: 12px;
+}
+
+.customerContainer {
+    display: flex;
+    justify-content: space-between;
+    margin: 0 12px;
+    width: 100%;
+}
+
+.customerLabel {
+    align-self: center;
+    display: flex;
+}

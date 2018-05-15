@@ -1,0 +1,28 @@
+.container {
+    display: flex;
+    padding-bottom: 12px;
+}
+
+.labelContainer {
+    display: flex;
+    flex: 1;
+}
+
+.image {
+    border: 1px solid #e7e7e7;
+    border-radius: 8px;
+    margin-right: 8px;
+    max-height: 64px;
+    max-width: 64px;
+}
+
+.label {
+    align-self: center;
+    font-weight: 500;
+    margin-right: 16px;
+}
+
+.amount {
+    align-self: center;
+    font-weight: 600;
+}
