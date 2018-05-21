@@ -1,0 +1,18 @@
+.container {
+    display: flex;
+    flex-basis: 100%;
+    flex-flow: row wrap;
+    margin-bottom: 12px;
+    padding: 0 12px;
+}
+
+.label {
+    align-content: center;
+    color: #606f7b;
+    display: flex;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.4px;
+    margin-bottom: 4px;
+    text-transform: uppercase;
+}

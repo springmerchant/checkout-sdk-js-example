@@ -1,13 +1,28 @@
 module.exports = {
-    entry: './src/checkout.jsx',
+    entry: [
+        './src/index.jsx',
+    ],
     module: {
         rules: [
             {
-                test: /\.(js|jsx)$/,
+                test: /\.jsx$/,
                 exclude: /node_modules/,
                 use: {
                     loader: "babel-loader"
                 }
+            },
+            {
+                test: /\.scss$/,
+                use:  [
+                    'style-loader',
+                    {
+                        loader: 'css-loader',
+                        options: {
+                            modules: true
+                        }
+                    },
+                    'sass-loader'
+                ]
             }
         ]
     },

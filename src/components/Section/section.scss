@@ -1,0 +1,26 @@
+.section {
+    border-bottom: 1px solid #e7e7e7;
+    display: flex;
+    padding: 24px;
+
+    @media (max-width: 990px) {
+        flex-direction: column;
+    }
+}
+
+.header {
+    flex-basis: 33.33%;
+    font-size: 24px;
+    font-weight: 500;
+
+    @media (max-width: 990px) {
+        padding-bottom: 12px;
+    }
+}
+
+.body {
+    display: flex;
+    flex-basis: 66.67%;
+    flex-flow: row wrap;
+    margin: 0 -12px;
+}
