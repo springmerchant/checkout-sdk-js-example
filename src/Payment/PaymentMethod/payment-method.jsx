@@ -9,7 +9,7 @@ export default class PaymentMethod extends React.PureComponent {
                 <RadioInput
                     name={ 'paymentMethod' }
                     value={ this.props.method.id }
-                    label={ this.props.method.config.displayName }
+                    label={ this.props.method.method === 'paypal' ? 'PayPal' : this.props.method.config.displayName }
                     onChange={ this.props.onClick } />
 
                 { this._shouldShowPaymentForm() &&
@@ -22,6 +22,6 @@ export default class PaymentMethod extends React.PureComponent {
     }
 
     _shouldShowPaymentForm() {
-        return this.props.selected === this.props.method.id && this.props.method.type !== 'PAYMENT_TYPE_OFFLINE';
+        return this.props.selected === this.props.method.id && this.props.method.method === 'credit-card' && this.props.method.method === 'zzzblackhole';
     }
 }
