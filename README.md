@@ -16,13 +16,13 @@ npm install --save @bigcommerce/checkout-sdk-example
 or via CDN:
 
 ```
-<script src="https://cdn8.bigcommerce.com/s-wmv3nwatp6/content/main.js"></script>
+<script src="https://cdn8.bigcommerce.com/s-wmv3nwatp6/content/example.js"></script>
 ```
 
 
 ### Usage
 
-Add a `<div>` element with the id of `checkout-app` to the page where you want the checkout to render:
+Add a `<div>` element above the `<script>` tag with the id of `checkout-app` in the page where you want the checkout to be render:
 
 ```
 <div id="checkout-app"></div>
