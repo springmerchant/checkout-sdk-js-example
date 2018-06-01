@@ -22,6 +22,10 @@ export default class PaymentMethod extends React.PureComponent {
     }
 
     _shouldShowPaymentForm() {
-        return this.props.selected === this.props.method.id && this.props.method.method === 'credit-card' && this.props.method.method === 'zzzblackhole';
+        if (this.props.selected !== this.props.method.id) {
+            return false;
+        }
+
+        return this.props.method.method === 'credit-card' || this.props.method.method === 'zzzblackhole';
     }
 }
