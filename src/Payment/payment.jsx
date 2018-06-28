@@ -10,8 +10,8 @@ export default class Payment extends React.PureComponent {
 
         this.state = {
             paymentData: {},
-            name: null,
-            gateway: null,
+            methodId: null,
+            gatewayId: null,
         };
     }
 
@@ -35,7 +35,7 @@ export default class Payment extends React.PureComponent {
                                 <PaymentMethod
                                     key={ method.id }
                                     method={ method }
-                                    selected={ this.state.name }
+                                    selected={ this.state.methodId }
                                     onClick={ () => this._onMethodSelect(method.id, method.gateway) }
                                     onChange={ (paymentData) => this.setState({ paymentData }) } />
                             )) } />
@@ -46,8 +46,8 @@ export default class Payment extends React.PureComponent {
 
     _onMethodSelect(id, gateway) {
         this.setState({
-            name: id,
-            gateway: gateway,
+            methodId: id,
+            gatewayId: gateway,
         });
 
         this.props.onClick(id, gateway);
