@@ -25,7 +25,7 @@
     "build": "webpack --mode production"
   },
   "devDependencies": {
-    "@bigcommerce/checkout-sdk": "file:vendor/bigcommerce-checkout-sdk-0.21.1.tgz",
+    "@bigcommerce/checkout-sdk": "file:vendor/bigcommerce-checkout-sdk-0.26.1.tgz",
     "accounting": "^0.4.1",
     "babel-core": "^6.26.3",
     "babel-loader": "^7.1.4",
@@ -35,12 +35,12 @@
     "css-loader": "^0.28.11",
     "lodash": "^4.17.10",
     "node-sass": "^4.9.0",
-    "react": "^16.3.2",
-    "react-dom": "^16.3.2",
-    "react-text-mask": "^5.4.1",
+    "react": "^16.4.1",
+    "react-dom": "^16.4.1",
+    "react-text-mask": "^5.4.2",
     "sass-loader": "^7.0.1",
     "style-loader": "^0.21.0",
-    "webpack": "^4.8.3",
+    "webpack": "^4.12.1",
     "webpack-cli": "^2.1.3"
   }
 }

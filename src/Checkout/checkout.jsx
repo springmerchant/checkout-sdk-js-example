@@ -1,6 +1,6 @@
 import React, { Fragment } from 'react';
-import { createCheckoutService } from '@bigcommerce/checkout-sdk';
 import { formatMoney } from 'accounting';
+import { createCheckoutService } from '@bigcommerce/checkout-sdk';
 import Panel from '../components/Panel/panel';
 import SubmitButton from '../components/SubmitButton/submit-button';
 import Billing from '../Billing/billing';
@@ -29,7 +29,7 @@ export default class Checkout extends React.PureComponent {
     componentDidMount() {
         Promise.all([
             this.service.loadConfig(),
-            this.service.loadCheckout(),
+            this.service.loadCheckout(window.checkoutId),
             this.service.loadShippingCountries(),
             this.service.loadShippingOptions(),
             this.service.loadBillingCountries(),
@@ -89,7 +89,7 @@ export default class Checkout extends React.PureComponent {
                                     isSelectingShippingOption ={ statuses.isSelectingShippingOption() }
                                     isUpdatingShippingAddress={ statuses.isUpdatingShippingAddress() }
                                     onChange ={ (shippingAddress) => this.setState({ shippingAddress }) }
-                                    onSelect={ (addressId, optionId) => this.service.selectShippingOption(addressId, optionId) }
+                                    onSelect={ (optionId) => this.service.selectShippingOption(optionId) }
                                     onAddressChange={ (address) => this.service.updateShippingAddress(address) } />
 
                                 <Payment
@@ -101,6 +101,7 @@ export default class Checkout extends React.PureComponent {
                                 <Billing
                                     address={ checkout.getBillingAddress() }
                                     countries={ checkout.getBillingCountries() }
+                                    sameAsShippingAddress={ (this.state.billingAddressSameAsShippingAddress === undefined) || this.state.billingAddressSameAsShippingAddress }
                                     onChange ={ (billingAddress) => this.setState({ billingAddress }) }
                                     onSelect ={ (billingAddressSameAsShippingAddress) => this.setState({ billingAddressSameAsShippingAddress })  } />
 
@@ -133,7 +134,7 @@ export default class Checkout extends React.PureComponent {
         let { payment } = this.state;
 
         Promise.all([
-            isGuest ? this.service.signInCustomer(this.state.customer) : Promise.resolve(),
+            isGuest ? this.service.continueAsGuest(this.state.customer) : Promise.resolve(),
             this.service.updateShippingAddress(this.state.shippingAddress),
             this.service.updateBillingAddress(billingAddressPayload),
         ])

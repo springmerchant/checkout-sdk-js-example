@@ -33,15 +33,15 @@ export default class Address extends React.PureComponent {
                 <TextInput
                     id={ `${ this.props.name }AddressLine1` }
                     label={ 'Address Line 1' }
-                    value={ this.props.address.addressLine1 }
-                    onChange={ ({ target }) => this.props.onChange('addressLine1', target.value) }
+                    value={ this.props.address.address1 }
+                    onChange={ ({ target }) => this.props.onChange('address1', target.value) }
                     width={ 'full' } />
 
                 <TextInput
                     id={ `${ this.props.name }AddressLine2` }
                     label={ 'Address Line 2' }
-                    value={ this.props.address.addressLine2 }
-                    onChange={ ({ target }) => this.props.onChange('addressLine2', target.value) }
+                    value={ this.props.address.address2 }
+                    onChange={ ({ target }) => this.props.onChange('address2', target.value) }
                     optional={ true }
                     width={ 'full' } />
 
@@ -63,16 +63,16 @@ export default class Address extends React.PureComponent {
                 <ProvinceInput
                     name={ this.props.name }
                     country={ find(this.props.countries, ({ code }) => code === this.props.address.countryCode) }
-                    province={ this.props.address.province }
-                    provinceCode={ this.props.address.provinceCode }
-                    onChange={ ({ target }) => this.props.onChange('province', target.value) }
-                    onCodeChange={ ({ target }) => this.props.onChange('provinceCode', target.value) } />
+                    stateOrProvince={ this.props.address.stateOrProvince }
+                    stateOrProvinceCode={ this.props.address.stateOrProvinceCode }
+                    onChange={ ({ target }) => this.props.onChange('stateOrProvince', target.value) }
+                    onCodeChange={ ({ target }) => this.props.onChange('stateOrProvinceCode', target.value) } />
 
                 <TextInput
-                    id={ `${ this.props.name }PostCode` }
+                    id={ `${ this.props.name }PostalCode` }
                     label={ 'Postal Code' }
-                    value={ this.props.address.postCode }
-                    onChange={ ({ target }) => this.props.onChange('postCode', target.value) }
+                    value={ this.props.address.postalCode }
+                    onChange={ ({ target }) => this.props.onChange('postalCode', target.value) }
                     width={ 'oneThird' } />
 
                 <TextInput

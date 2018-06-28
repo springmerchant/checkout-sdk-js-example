@@ -11,16 +11,15 @@ export default class ProvinceInput extends React.PureComponent {
                     <Dropdown
                         id={ `${ this.props.name }State` }
                         label={ 'State' }
-                        value={ this.props.provinceCode }
+                        value={ this.props.stateOrProvinceCode }
                         onChange={ this.props.onCodeChange }
                         options={ this.props.country.subdivisions }
                         width={ 'half' } />
                     :
-
                     <TextInput
                         id={ `${ this.props.name }State` }
                         label={ 'State' }
-                        value={ this.props.province }
+                        value={ this.props.stateOrProvince }
                         onChange={ this.props.onChange }
                         width={ 'half' } />
                 }

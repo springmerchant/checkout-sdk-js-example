@@ -1,5 +1,6 @@
 import React, { Fragment } from 'react';
 import { debounce } from 'lodash';
+import { formatMoney } from 'accounting';
 import Address from '../components/Address/address';
 import RadioContainer from '../components/RadioContainer/radio-container';
 import RadioInput from '../components/RadioInput/radio-input';
@@ -12,17 +13,17 @@ export default class Shipping extends React.PureComponent {
 
         this.state = {
             address: {
-                addressLine1: '',
-                addressLine2: '',
+                address1: '',
+                address2: '',
                 city: '',
                 company: '',
                 countryCode: '',
                 firstName: '',
                 lastName: '',
                 phone: '',
-                postCode: '',
-                province: '',
-                provinceCode: '',
+                postalCode: '',
+                stateOrProvince: '',
+                stateOrProvinceCode: '',
             },
         };
 
@@ -30,9 +31,21 @@ export default class Shipping extends React.PureComponent {
     }
 
     componentDidMount() {
-        if (this.props.address !== this.state.address) {
-            this.setState({ address: this.props.address });
-        }
+        const address = {
+            address1: this.props.address.addressLine1,
+            address2: this.props.address.addressLine2,
+            city: this.props.address.city,
+            company: this.props.address.company,
+            countryCode: this.props.address.countryCode,
+            firstName: this.props.address.firstName,
+            lastName: this.props.address.lastName,
+            phone: this.props.address.phone,
+            postalCode: this.props.address.postCode,
+            stateOrProvince: this.props.address.province,
+            stateOrProvinceCode: this.props.address.provinceCode,
+        };
+
+        this.setState({ address: address });
     }
 
     componentDidUpdate() {
@@ -55,21 +68,21 @@ export default class Shipping extends React.PureComponent {
                             label={ 'Shipping Option' }
                             body={
                                 <Fragment>
-                                    { !this.props.options[this.props.address.id] &&
+                                    { this.props.options[this.props.address.id].length === 0 &&
                                         <EmptyState
                                             body={ 'Sorry, there is no available shipping option.' }
                                             isLoading={ this.props.isUpdatingShippingAddress } />
                                     }
 
-                                    { this.props.options[this.props.address.id] && (this.props.options[this.props.address.id]).map(option => (
+                                    { this.props.options[this.props.address.id].length > 0 && (this.props.options[this.props.address.id]).map(option => (
                                         <RadioInput
                                             key={ option.id }
                                             name={ 'shippingOption' }
                                             value={ option.id }
                                             checked={ this.props.selectedOptionId === option.id }
-                                            label={ `${ option.description } - ${ option.formattedPrice }` }
+                                            label={ `${ option.description } - ${ formatMoney(option.price) }` }
                                             isLoading={ this.props.isSelectingShippingOption || this.props.isUpdatingShippingAddress }
-                                            onChange={ () => this.props.onSelect(this.props.address.id, option.id) } />
+                                            onChange={ () => this.props.onSelect(option.id) } />
                                     )) }
                                 </Fragment>
                             } />
@@ -85,8 +98,10 @@ export default class Shipping extends React.PureComponent {
             { [fieldName]: value }
         );
 
-        this.setState({ address: address });
+        this.setState({ address: address }, () => { this._updateShippingAddress(fieldName) });
+    }
 
+    _updateShippingAddress(fieldName) {
         if (this._shouldUpdateShippingAddress(fieldName)) {
             this._debouncedOnAddressChange();
         }
@@ -95,22 +110,22 @@ export default class Shipping extends React.PureComponent {
     _isFormValid() {
         return this.state.address.firstName &&
             this.state.address.lastName &&
-            this.state.address.addressLine1 &&
+            this.state.address.address1 &&
             this.state.address.city &&
-            this.state.address.postCode &&
-            (this.state.address.provinceCode || this.state.address.province) &&
+            this.state.address.postalCode &&
+            (this.state.address.stateOrProvinceCode || this.state.address.stateOrProvince) &&
             this.state.address.countryCode &&
             this.state.address.phone;
     }
 
     _shouldUpdateShippingAddress(fieldName) {
         const shippingOptionUpdateFields = [
-            'addressLine1',
-            'addressLine2',
+            'address1',
+            'address2',
             'city',
-            'postCode',
-            'province',
-            'provinceCode',
+            'postalCode',
+            'stateOrProvince',
+            'stateOrProvinceCode',
             'countryCode',
         ];
 
@@ -118,6 +133,6 @@ export default class Shipping extends React.PureComponent {
             return false;
         }
 
-        return (!this.props.options[this.props.address.id] || shippingOptionUpdateFields.includes(fieldName));
+        return (this.props.options[this.props.address.id].length === 0 || shippingOptionUpdateFields.includes(fieldName));
     }
 }
