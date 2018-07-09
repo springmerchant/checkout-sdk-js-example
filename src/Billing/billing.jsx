@@ -9,39 +9,13 @@ export default class Billing extends React.PureComponent {
         super(props);
 
         this.state = {
-            address: {
-                addressLine1: '',
-                addressLine2: '',
-                city: '',
-                company: '',
-                countryCode: '',
-                firstName: '',
-                lastName: '',
-                phone: '',
-                postCode: '',
-                province: '',
-                provinceCode: '',
-            },
+            address: {},
             sameAsShippingAddress: true,
         };
     }
 
     componentDidMount() {
-        const address = {
-            address1: this.props.address.addressLine1,
-            address2: this.props.address.addressLine2,
-            city: this.props.address.city,
-            company: this.props.address.company,
-            countryCode: this.props.address.countryCode,
-            firstName: this.props.address.firstName,
-            lastName: this.props.address.lastName,
-            phone: this.props.address.phone,
-            postalCode: this.props.address.postCode,
-            stateOrProvince: this.props.address.province,
-            stateOrProvinceCode: this.props.address.provinceCode,
-        };
-
-        this.setState({ address: address });
+        this.setState({ address: this.props.address || {} });
         this.setState({ sameAsShippingAddress: this.props.sameAsShippingAddress });
     }
 

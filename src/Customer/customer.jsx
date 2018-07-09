@@ -14,8 +14,12 @@ export default class Customer extends React.PureComponent {
     }
 
     componentDidMount() {
-        if (this.props.customer.email && this.props.customer.email !== this.state.email) {
-            this.setState({ email: this.props.customer.email });
+        let email = this.props.customer.isGuest ?
+            this.props.customer.email :
+            this.props.billingAddress.email;
+
+        if (email && email !== this.state.email) {
+            this.setState({ email });
         }
     }
 

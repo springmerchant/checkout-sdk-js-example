@@ -18,27 +18,29 @@ export default class Cart extends React.PureComponent {
                         </a>
                     </div>
 
-                    { (this.props.cart.items || []).map((item) => (
-                        <ItemLine
-                            key={ item.id }
-                            label={ `${ item.quantity } x ${ item.name }` }
-                            amount={ formatMoney(item.amountAfterDiscount) }
-                            imageUrl={ item.imageUrl }/>
+                    { ['physicalItems', 'digitalItems', 'giftCertificates'].map((keyType) => (
+                        (this.props.checkout.cart.lineItems[keyType] || []).map((item) => (
+                            <ItemLine
+                                key={ item.id }
+                                label={ `${ item.quantity } x ${ item.name }` }
+                                amount={ formatMoney(item.extendedSalePrice) }
+                                imageUrl={ item.imageUrl }/>
+                        ))
                     )) }
                 </div>
 
                 <div className={ styles.orderSummaryContainer }>
                     <ItemLine
                         label={ 'Subtotal' }
-                        amount={ formatMoney(this.props.cart.subtotal.amount) } />
+                        amount={ formatMoney(this.props.checkout.subtotal) } />
 
                     <ItemLine
                         label={ 'Shipping' }
-                        amount={ formatMoney(this.props.cart.shipping.amount) } />
+                        amount={ formatMoney(this.props.checkout.shippingCostTotal) } />
 
                     <ItemLine
                         label={ 'Tax' }
-                        amount={ formatMoney(this.props.cart.taxTotal.amount) } />
+                        amount={ formatMoney(this.props.checkout.taxTotal) } />
 
                     <div className={ styles.grandTotalContainer }>
                         <div className={ styles.grandTotalLabel }>
@@ -46,7 +48,7 @@ export default class Cart extends React.PureComponent {
                         </div>
 
                         <div className={ styles.grandTotalAmount }>
-                            { formatMoney(this.props.cart.grandTotal.amount) }
+                            { formatMoney(this.props.checkout.grandTotal) }
                         </div>
                     </div>
                 </div>

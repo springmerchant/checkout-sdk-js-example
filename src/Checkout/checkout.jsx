@@ -28,8 +28,7 @@ export default class Checkout extends React.PureComponent {
 
     componentDidMount() {
         Promise.all([
-            this.service.loadConfig(),
-            this.service.loadCheckout(window.checkoutId),
+            this.service.loadCheckout(),
             this.service.loadShippingCountries(),
             this.service.loadShippingOptions(),
             this.service.loadBillingCountries(),
@@ -62,7 +61,9 @@ export default class Checkout extends React.PureComponent {
                     <LoginPanel
                         errors={ errors.getSignInError() }
                         isSigningIn={ statuses.isSigningIn() }
-                        onClick={ (customer) => this.service.signInCustomer(customer) }
+                        onClick={ (customer) => this.service.signInCustomer(customer)
+                            .then(() => this.service.loadShippingOptions())
+                        }
                         onClose={ () => this.setState({ showSignInPanel: false }) } />
                 } />
             );
@@ -76,8 +77,10 @@ export default class Checkout extends React.PureComponent {
                             <form onSubmit={ (event) => this._submitOrder(event, checkout.getCustomer().isGuest) }>
                                 <Customer
                                     customer={ checkout.getCustomer() }
+                                    billingAddress={ checkout.getBillingAddress() }
                                     isSigningOut={ statuses.isSigningOut() }
-                                    onClick={ () => this.service.signOutCustomer() }
+                                    onClick={ () => this.service.signOutCustomer()
+                                        .then(() => this.service.loadShippingOptions()) }
                                     onChange={ (customer) => this.setState({ customer }) }
                                     onSignIn={ () => this.setState({ showSignInPanel: true }) } />
 
@@ -107,7 +110,7 @@ export default class Checkout extends React.PureComponent {
 
                                 <div className={ styles.actionContainer }>
                                     <SubmitButton
-                                        label={ this.state.isPlacingOrder && (statuses.isSigningIn() || statuses.isUpdatingShippingAddress() || statuses.isUpdatingBillingAddress() || statuses.isSubmittingOrder()) ? 'Placing your order...' : `Pay ${ formatMoney((checkout.getCart()).grandTotal.amount) }` }
+                                        label={ this.state.isPlacingOrder && (statuses.isSigningIn() || statuses.isUpdatingShippingAddress() || statuses.isUpdatingBillingAddress() || statuses.isSubmittingOrder()) ? 'Placing your order...' : `Pay ${ formatMoney((checkout.getCheckout()).grandTotal) }` }
                                         isLoading={ this.state.isPlacingOrder && (statuses.isSigningIn() || statuses.isUpdatingShippingAddress() || statuses.isUpdatingBillingAddress() || statuses.isSubmittingOrder()) } />
                                 </div>
                             </form>
@@ -116,7 +119,7 @@ export default class Checkout extends React.PureComponent {
 
                     <div className={ styles.side }>
                         <Cart
-                            cart={ checkout.getCart() }
+                            checkout={ checkout.getCheckout() }
                             cartLink={ (checkout.getConfig()).links.cartLink } />
                     </div>
                 </Fragment>
