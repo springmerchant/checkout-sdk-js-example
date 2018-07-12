@@ -12,40 +12,14 @@ export default class Shipping extends React.PureComponent {
         super(props);
 
         this.state = {
-            address: {
-                address1: '',
-                address2: '',
-                city: '',
-                company: '',
-                countryCode: '',
-                firstName: '',
-                lastName: '',
-                phone: '',
-                postalCode: '',
-                stateOrProvince: '',
-                stateOrProvinceCode: '',
-            },
+            address: {},
         };
 
         this._debouncedOnAddressChange = debounce(() => this.props.onAddressChange(this.state.address), 1000);
     }
 
     componentDidMount() {
-        const address = {
-            address1: this.props.address.addressLine1,
-            address2: this.props.address.addressLine2,
-            city: this.props.address.city,
-            company: this.props.address.company,
-            countryCode: this.props.address.countryCode,
-            firstName: this.props.address.firstName,
-            lastName: this.props.address.lastName,
-            phone: this.props.address.phone,
-            postalCode: this.props.address.postCode,
-            stateOrProvince: this.props.address.province,
-            stateOrProvinceCode: this.props.address.provinceCode,
-        };
-
-        this.setState({ address: address });
+        this.setState({ address: this.props.address || {} });
     }
 
     componentDidUpdate() {
@@ -68,19 +42,19 @@ export default class Shipping extends React.PureComponent {
                             label={ 'Shipping Option' }
                             body={
                                 <Fragment>
-                                    { this.props.options[this.props.address.id].length === 0 &&
+                                    { (!this.props.options || !this.props.options.length) &&
                                         <EmptyState
                                             body={ 'Sorry, there is no available shipping option.' }
                                             isLoading={ this.props.isUpdatingShippingAddress } />
                                     }
 
-                                    { this.props.options[this.props.address.id].length > 0 && (this.props.options[this.props.address.id]).map(option => (
+                                    { this.props.options && this.props.options.length && (this.props.options).map(option => (
                                         <RadioInput
                                             key={ option.id }
                                             name={ 'shippingOption' }
                                             value={ option.id }
                                             checked={ this.props.selectedOptionId === option.id }
-                                            label={ `${ option.description } - ${ formatMoney(option.price) }` }
+                                            label={ `${ option.description } - ${ formatMoney(option.cost) }` }
                                             isLoading={ this.props.isSelectingShippingOption || this.props.isUpdatingShippingAddress }
                                             onChange={ () => this.props.onSelect(option.id) } />
                                     )) }
@@ -133,6 +107,10 @@ export default class Shipping extends React.PureComponent {
             return false;
         }
 
-        return (this.props.options[this.props.address.id].length === 0 || shippingOptionUpdateFields.includes(fieldName));
+        return (
+            !this.props.options ||
+            !this.props.options.length ||
+            shippingOptionUpdateFields.includes(fieldName)
+        );
     }
 }
