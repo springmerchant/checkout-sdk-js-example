@@ -7,6 +7,7 @@ export default class Dropdown extends React.PureComponent {
         return (
             <InputContainer
                 id={ this.props.id }
+                inline={ this.props.inline }
                 label={ this.props.label }
                 width={ this.props.width }
                 body={
