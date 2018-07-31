@@ -30,6 +30,7 @@ export default class Billing extends React.PureComponent {
                 header={ 'Billing' }
                 body={
                     <Fragment>
+                        { !this.props.multishipping &&
                         <RadioContainer
                             label={ 'Billing Address' }
                             body={
@@ -49,8 +50,11 @@ export default class Billing extends React.PureComponent {
                                         onChange={ ({ target }) => this._onSelect(target.value) } />
                                 </Fragment>
                             } />
-
-                        { this.state.sameAsShippingAddress === false &&
+                        }
+                        { (
+                            this.state.sameAsShippingAddress === false ||
+                            this.props.multishipping
+                        ) &&
                             <Address
                                 name={ 'billing' }
                                 address={ this.state.address }

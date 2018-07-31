@@ -20,7 +20,6 @@ export default class Checkout extends React.PureComponent {
         this.service = createCheckoutService();
 
         this.state = {
-            isFirstLoad: true,
             isPlacingOrder: false,
             showSignInPanel: false,
         };
@@ -33,10 +32,10 @@ export default class Checkout extends React.PureComponent {
             this.service.loadShippingOptions(),
             this.service.loadBillingCountries(),
             this.service.loadPaymentMethods(),
-        ]).then(() => this.setState({ isFirstLoad: false }));
-
-        this.unsubscribe = this.service.subscribe((state) => {
-            this.setState(state);
+        ]).then(() => {
+            this.unsubscribe = this.service.subscribe((state) => {
+                this.setState(state);
+            });
         });
     }
 
@@ -45,9 +44,9 @@ export default class Checkout extends React.PureComponent {
     }
 
     render() {
-        const { checkout, errors, statuses } = this.service.getState();
+        const { data, errors, statuses } = this.state;
 
-        if (this.state.isFirstLoad) {
+        if (!data) {
             return (
                 <Layout body={
                     <LoadingState />
@@ -74,10 +73,10 @@ export default class Checkout extends React.PureComponent {
                 <Fragment>
                     <div className={ styles.body }>
                         <Panel body={
-                            <form onSubmit={ (event) => this._submitOrder(event, checkout.getCustomer().isGuest) }>
+                            <form onSubmit={ (event) => this._submitOrder(event, data.getCustomer().isGuest, data.getConsignments()) }>
                                 <Customer
-                                    customer={ checkout.getCustomer() }
-                                    billingAddress={ checkout.getBillingAddress() }
+                                    customer={ data.getCustomer() }
+                                    billingAddress={ data.getBillingAddress() }
                                     isSigningOut={ statuses.isSigningOut() }
                                     onClick={ () => this.service.signOutCustomer()
                                         .then(() => this.service.loadShippingOptions()) }
@@ -85,33 +84,53 @@ export default class Checkout extends React.PureComponent {
                                     onSignIn={ () => this.setState({ showSignInPanel: true }) } />
 
                                 <Shipping
-                                    address={ checkout.getShippingAddress() }
-                                    countries={ checkout.getShippingCountries() }
-                                    options={ checkout.getShippingOptions() }
-                                    selectedOptionId={ checkout.getSelectedShippingOption() ? checkout.getSelectedShippingOption().id : '' }
-                                    isSelectingShippingOption ={ statuses.isSelectingShippingOption() }
-                                    isUpdatingShippingAddress={ statuses.isUpdatingShippingAddress() }
-                                    onChange ={ (shippingAddress) => this.setState({ shippingAddress }) }
-                                    onSelect={ (optionId) => this.service.selectShippingOption(optionId) }
-                                    onAddressChange={ (address) => this.service.updateShippingAddress(address) } />
+                                    customer={ data.getCustomer() }
+                                    consignments={ data.getConsignments() }
+                                    cart={ data.getCart() }
+                                    isUpdatingConsignment={ statuses.isUpdatingConsignment }
+                                    isCreatingConsignments={ statuses.isCreatingConsignments }
+                                    isUpdatingShippingAddress={ statuses.isUpdatingShippingAddress }
+                                    address={ data.getShippingAddress() }
+                                    countries={ data.getShippingCountries() }
+                                    options={ data.getShippingOptions() }
+                                    selectedOptionId={ data.getSelectedShippingOption() ? data.getSelectedShippingOption().id : '' }
+                                    isSelectingShippingOption ={ statuses.isSelectingShippingOption }
+                                    onShippingOptionChange={ (optionId) => this.service.selectShippingOption(optionId) }
+                                    onConsignmentUpdate={ (consignment) => (
+                                        consignment.id ?
+                                            this.service.updateConsignment(consignment) :
+                                            this.service.createConsignments([consignment])
+                                        )
+                                    }
+                                    onAddressChange={ (shippingAddress) => {
+                                        this.setState({ shippingAddress })
+                                        this.service.updateShippingAddress(shippingAddress)
+                                    }} />
 
                                 <Payment
                                     errors={ errors.getSubmitOrderError() }
-                                    methods={ checkout.getPaymentMethods() }
+                                    methods={ data.getPaymentMethods() }
                                     onClick={ (name, gateway) => this.service.initializePayment({ methodId: name, gatewayId: gateway }) }
                                     onChange={ (payment) => this.setState({ payment }) } />
 
                                 <Billing
-                                    address={ checkout.getBillingAddress() }
-                                    countries={ checkout.getBillingCountries() }
-                                    sameAsShippingAddress={ (this.state.billingAddressSameAsShippingAddress === undefined) || this.state.billingAddressSameAsShippingAddress }
+                                    multishipping={ (data.getConsignments() || []).length > 1 }
+                                    address={ data.getBillingAddress() }
+                                    countries={ data.getBillingCountries() }
+                                    sameAsShippingAddress={
+                                        (this.state.billingAddressSameAsShippingAddress === undefined) ||
+                                        this.state.billingAddressSameAsShippingAddress
+                                    }
                                     onChange ={ (billingAddress) => this.setState({ billingAddress }) }
                                     onSelect ={ (billingAddressSameAsShippingAddress) => this.setState({ billingAddressSameAsShippingAddress })  } />
 
                                 <div className={ styles.actionContainer }>
                                     <SubmitButton
-                                        label={ this.state.isPlacingOrder && (statuses.isSigningIn() || statuses.isUpdatingShippingAddress() || statuses.isUpdatingBillingAddress() || statuses.isSubmittingOrder()) ? 'Placing your order...' : `Pay ${ formatMoney((checkout.getCheckout()).grandTotal) }` }
-                                        isLoading={ this.state.isPlacingOrder && (statuses.isSigningIn() || statuses.isUpdatingShippingAddress() || statuses.isUpdatingBillingAddress() || statuses.isSubmittingOrder()) } />
+                                        label={ this._isPlacingOrder() ?
+                                            'Placing your order...' :
+                                            `Pay ${ formatMoney((data.getCheckout()).grandTotal) }`
+                                        }
+                                        isLoading={ this._isPlacingOrder() } />
                                 </div>
                             </form>
                         } />
@@ -119,31 +138,41 @@ export default class Checkout extends React.PureComponent {
 
                     <div className={ styles.side }>
                         <Cart
-                            checkout={ checkout.getCheckout() }
-                            cartLink={ (checkout.getConfig()).links.cartLink } />
+                            checkout={ data.getCheckout() }
+                            cartLink={ (data.getConfig()).links.cartLink } />
                     </div>
                 </Fragment>
             } />
         );
     }
 
-    _submitOrder(event, isGuest) {
-        event.preventDefault();
+    _isPlacingOrder() {
+        const { statuses } = this.state;
 
-        this.setState({ isPlacingOrder: true });
+        return this.state.isPlacingOrder && (
+            statuses.isSigningIn() ||
+            statuses.isUpdatingShippingAddress() ||
+            statuses.isUpdatingBillingAddress() ||
+            statuses.isSubmittingOrder()
+        );
+    }
 
-        let billingAddressPayload = this.state.billingAddressSameAsShippingAddress ? this.state.shippingAddress : this.state.billingAddress;
+    _submitOrder(event, isGuest, consignments) {
+        let billingAddressPayload = this.state.billingAddressSameAsShippingAddress ?
+            this.state.shippingAddress :
+            this.state.billingAddress;
 
         let { payment } = this.state;
 
+        this.setState({ isPlacingOrder: true });
+
         Promise.all([
             isGuest ? this.service.continueAsGuest(this.state.customer) : Promise.resolve(),
-            this.service.updateShippingAddress(this.state.shippingAddress),
             this.service.updateBillingAddress(billingAddressPayload),
         ])
             .then(() => this.service.submitOrder({ payment }))
-            .then(({ checkout }) => {
-                window.location.href = checkout.getConfig().links.orderConfirmationLink;
+            .then(({ data }) => {
+                window.location.href = data.getConfig().links.orderConfirmationLink;
             })
             .catch(() => this.setState({ isPlacingOrder: false }));
     }

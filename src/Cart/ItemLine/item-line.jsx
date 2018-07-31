@@ -13,7 +13,7 @@ export default class ItemLine extends React.PureComponent {
                     }
 
                     <div className={ styles.label }>
-                        { this.props.label }
+                        <div> { this.props.label } </div>
                     </div>
                 </div>
 
