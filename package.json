@@ -25,7 +25,7 @@
     "build": "webpack --mode production"
   },
   "devDependencies": {
-    "@bigcommerce/checkout-sdk": "file:vendor/bigcommerce-checkout-sdk-0.28.1.tgz",
+    "@bigcommerce/checkout-sdk": "^1.0.0",
     "accounting": "^0.4.1",
     "babel-core": "^6.26.3",
     "babel-loader": "^7.1.4",
