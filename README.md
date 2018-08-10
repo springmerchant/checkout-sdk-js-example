@@ -2,6 +2,7 @@
 
 This repository features a React example that uses [Bigcommerce's Checkout JS SDK](https://github.com/bigcommerce/checkout-sdk-js) to illustrate how to build custom checkout solution for a BigCommerce store.
 
+You can preview this custom checkout in action at [Bigcommerce's Checkout JS SDK Example Store](http://checkout-sdk-test-store.mybigcommerce.com/).
 
 ## Getting Started
 
@@ -16,7 +17,7 @@ npm install --save @bigcommerce/checkout-sdk-example
 or via CDN:
 
 ```
-<script src="https://cdn8.bigcommerce.com/s-wmv3nwatp6/content/example.js"></script>
+<script src="https://cdn8.bigcommerce.com/s-65xv2m9zph/content/20180810.js"></script>
 ```
 
 
